@@ -1,0 +1,108 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User{
+  id              String    @id @default(uuid())
+  clerkUserId     String    @unique
+  email           String    @unique
+  name            String?   
+  imageUrl        String?
+  industry        String?
+  industryInsight IndustryInsight? @relation (fields: [industry], references: [industry])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  //profile fields
+  bio             String?
+  experience      Int?
+  skills          String[]
+  assessments     Assessment[]
+  resume          Resume?
+  coverLetter     CoverLetter[]
+}
+
+model Assessment{
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  quizScore       Float     //overall quiz score
+  questions       Json[]    //array of question objects with answers
+  category        String   //"technical", "soft skills", etc.
+  improvementTip  String?  //AI-generated improvement tip
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+}
+model Resume{
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id])
+  content         String    //resume content in markdown or text format
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+}
+model CoverLetter{
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  content         String    //cover letter content in markdown or text format
+  jobDescription  String?   //optional job description to tailor the cover letter
+  companyName     String    //optional company name to personalize the cover letter
+  jobTitle        String    //optional job title to personalize the cover letter
+  status          String    @default("draft") //status of the cover letter (draft, submitted, approved, rejected)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model IndustryInsight{
+  id              String  @id @default(cuid())
+  industry        String  @unique
+  users           User[] //users interested in this industry
+
+  salaryRanges    Json[] //array of salary ranges for different levels
+  // Example: [{"level": "entry", "min": 50000, "max": 70000}, {"level": "mid", "min": 70000, "max": 100000}]
+
+  //Industry trends
+  growthRate      Float //optional growth rate for the industry
+  demandLevel     DemandLevel @default(Medium) //"high", "medium", "low" - optional demand level for the industry
+  topSkills       String[] //top skills in this industry
+
+  //market conditions
+  marketOutlook  MarketOutlook @default(Neutral)   //"positive", "neutral", "negative" - optional market outlook for the industry
+  keyTrends      String[] //key trends in the industry
+
+  //learning suggestions
+  recommendedSkills String[] //recommended courses for this industry
+
+  lastUpdated     DateTime @default(now())
+  nextUpdate      DateTime //optional next update date for the industry insights
+
+  @@index([industry])
+}
+enum DemandLevel{
+  High
+  Medium
+  Low
+}
+enum MarketOutlook{
+  Positive
+  Neutral
+  Negative
+}
