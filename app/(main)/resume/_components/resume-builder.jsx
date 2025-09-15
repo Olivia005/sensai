@@ -446,11 +446,10 @@ const ResumeBuilder = ({ initialContent }) => {
             id='resume-pdf'
             style={{
               position: 'absolute',
-              top: 0,
-              left: 0,
-              zIndex: -1,
-              backgroundColor: '#ffffff',
-              color: '#000000',
+              top: '-9999px',
+              left: '-9999px',
+              backgroundColor: '#000000',
+              color: '#ffffff',
               padding: '20px',
               fontSize: '14px',
               lineHeight: '1.5',
